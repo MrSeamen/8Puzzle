@@ -1,4 +1,4 @@
-# 8Puzzle
+# 8Puzzle Project by Simon Wang
 8Puzzle Project by Simon Wang for CSDS 391 Introduction to Artificial Intelligence
 
 **Overview**
