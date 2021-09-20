@@ -7,7 +7,7 @@ class BoardTest {
     private Board board;
 
     public void setUp() throws Exception {
-        board = new Board(3);
+        board = new Board(9);
     }
 
     public void setStateTest() {

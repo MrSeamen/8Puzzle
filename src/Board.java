@@ -1,11 +1,16 @@
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Objects;
+import java.util.Queue;
 
 public class Board {
     private String stringState;
-    private int side; //number of tiles per side
-    private int total; //total amount of boxes
+    private final int side; //number of tiles per side
+    private final int total; //total amount of boxes
     private int[][] boardState; //state space
-    private int[][] goalState = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
+    private final int[][] goalState = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
     private final LogClass logger = new LogClass(); //logger
+    private enum Direction {NORTH, SOUTH, EAST, WEST};
 
     Board(int size) {
         side = (int)Math.sqrt((size));
@@ -18,7 +23,7 @@ public class Board {
     String setState(String state) {
         try {
             //if state is not null
-            if (state != null) {
+            if (Objects.nonNull(state)) {
                 char[] stateArray = state.toCharArray();
                 //then if state doesnt have the all the proper values for the specified puzzle size
                 if (!checkSequentialInput(stateArray)) {
@@ -101,64 +106,101 @@ public class Board {
                 returnString.append("/n").append(c).append(" ");
             }
         }
-        System.out.println(returnString);
+        System.out.println("Formatted Output: " + returnString);
         return returnString.toString();
     }
 
     // TODO: move <direction>
-    String move(String direction) {
+    String move(Direction direction) {
         try {
             //If direction is not null
-            
-            //then if direction is a valid direction
+            if (Objects.nonNull(direction)) {
+                //then if direction is a valid direction
+                if (checkDirections(direction)) {
+                    //then swap blank with character in direction
 
-            //then swap blank with character in direction
+                    //else
 
-            //else
-
-            //error: invalid direction
-            //else
-
-            //error: direction given is null
-        } catch (Exception e) {
-
+                    //error: invalid direction
+                    //else
+                } else {
+                    //error: direction given is null
+                    logger.log(LogClass.Methods.MOVE, "Null Input Given");
+                }
+            }
+        } catch(Exception e){
+            logger.log(LogClass.Methods.SETSTATE, "Unexpected Exception");
         }
         return stringState;
     }
 
-    // TODO: randomizeState <n>
-    String randomizeState(int n) {
-        //Counter = n
+    boolean checkDirections(Direction direction) {
+        boolean validDirection = true;
+        switch(direction) {
+            case NORTH:
+                break;
+            case SOUTH:
+                break;
+            case EAST:
+                break;
+            case WEST:
+                break;
+        }
+        return validDirection;
+    }
 
-        //lastDirection = “”
 
-        //directionlist of north south east west
 
-        //removedlist of “”
-
-        //For I of n
-
-            //If lastDirection is not “”
-
-                //Remove last direction from directionlist, add to removedlist
-
-                //Randomized routine(directionlist, removedlist)
-
-            //else
-
-                //randomized routine(directionlist, removedlist)
-
-                //Reset directionlist and removed list
-
+    //randomizeState <n>
+    String randomizeState(int n, Direction direction) {
+        try {
+            //lastDirection = lastdirection
+            Direction lastDirection = direction;
+            //newDirection = ""
+            Direction newDirection;
+            //directionlist of north south east west
+            ArrayList<Direction> directionList = new ArrayList<>();
+            //removedlist of “”
+            Queue<Direction> removedList = new LinkedList<>();
+            //if n <= 0
+            if (n <= 0) {
+                //then return state
+                return stringState;
+                //else
+            } else {
+                //if last direction is not null
+                if (Objects.nonNull(direction)) {
+                    //then remove last direction from direction list, add to removed list
+                    directionList.remove(lastDirection);
+                    directionList.add(removedList.poll());
+                    removedList.add(lastDirection);
+                    //routine takes (directionlist) and picks a direction
+                    newDirection = randomizedDirection(directionList);
+                    //move in direction
+                    move(newDirection);
+                    //randomizeState(n-1, lastdirection)
+                    randomizeState(n-1, lastDirection);
+                }
+                //else
+                else {
+                    //error
+                    logger.log(LogClass.Methods.RANDOMIZESTATE, "Null Input Given");
+                }
+            }
+        } catch(Exception e) {
+            logger.log(LogClass.Methods.SETSTATE, "Unexpected Exception");
+        }
         return stringState;
     }
 
-    //randomizedroutine ( dlist, rlist)
-    //If blank is touching wall
-    //Remove directions that touch wall, add to removedlist
-    //Pick a random number from 1-directionlist size
-    //move(direction)
-    //add directions from removedlist to directionlist, clear removedlist
+    //randomizedroutine ( dlist)
+    Direction randomizedDirection(ArrayList<Direction> directionArrayList) {
+        //If blank is touching wall
+        //Remove directions that touch wall, add to removedlist
+        //Pick a random number from 1-directionlist size
+        //move(direction)
+        //add directions from removedlist to directionlist, clear removedlist
+    }
 
     // TODO: solveAStar <heuristic>
     void solveAStar(int heuristic) {
