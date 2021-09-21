@@ -11,6 +11,7 @@ public class Board {
     private final int[][] goalState = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
     private final LogClass logger = new LogClass(); //logger
     private enum Direction {NORTH, SOUTH, EAST, WEST};
+    public int maxNodes;
 
     Board(int size) {
         side = (int)Math.sqrt((size));
@@ -118,41 +119,80 @@ public class Board {
                 //then if direction is a valid direction
                 if (checkDirections(direction)) {
                     //then swap blank with character in direction
-
-                    //else
-
-                    //error: invalid direction
+                    swap(getBlankPosition(), direction);
                     //else
                 } else {
-                    //error: direction given is null
-                    logger.log(LogClass.Methods.MOVE, "Null Input Given");
+                    //error: invalid direction
+                    logger.log(LogClass.Methods.MOVE, "Invalid Direction");
+                    System.out.println("Could not move " + direction.toString() + ", move is not within board space.");
                 }
+            } else {
+                //error: direction given is null
+                logger.log(LogClass.Methods.MOVE, "Null Input Given");
             }
         } catch(Exception e){
-            logger.log(LogClass.Methods.SETSTATE, "Unexpected Exception");
+            logger.log(LogClass.Methods.MOVE, "Unexpected Exception");
         }
         return stringState;
     }
 
-    boolean checkDirections(Direction direction) {
-        boolean validDirection = true;
+    void swap(int[] blankPos, Direction direction) {
         switch(direction) {
             case NORTH:
+                validDirection = checkPosition(getBlankPosition(), 1, 0);
                 break;
             case SOUTH:
+                validDirection = checkPosition(getBlankPosition(), -1, 0);
                 break;
             case EAST:
+                validDirection = checkPosition(getBlankPosition(), 0, 1);
                 break;
             case WEST:
+                validDirection = checkPosition(getBlankPosition(), 0, -1);
+                break;
+        }
+    }
+
+    boolean checkDirections(Direction direction) {
+        boolean validDirection = false;
+        switch(direction) {
+            case NORTH:
+                validDirection = checkPosition(getBlankPosition(), 1, 0);
+                break;
+            case SOUTH:
+                validDirection = checkPosition(getBlankPosition(), -1, 0);
+                break;
+            case EAST:
+                validDirection = checkPosition(getBlankPosition(), 0, 1);
+                break;
+            case WEST:
+                validDirection = checkPosition(getBlankPosition(), 0, -1);
                 break;
         }
         return validDirection;
     }
 
+    int[] getBlankPosition() {
+        int[] position = new int[2];
+        for (int row = 0; row < side; row++) {
+            for (int col = 0; col < side; col++) {
+                if (boardState[row][col] == 0) {
+                    position[0] = row;
+                    position[1] = col;
+                }
+            }
+        }
+        return position;
+    }
 
+    boolean checkPosition(int[] blankPos, int vertical, int horizontal) {
+        int deltaX = blankPos[0] + horizontal;
+        int deltaY = blankPos[1] + vertical;
+        return ((0 <= deltaX || deltaX < side) && (0 <= deltaY || deltaY < side));
+    }
 
     //randomizeState <n>
-    String randomizeState(int n, Direction direction) {
+    public String randomizeState(int n, Direction direction) {
         try {
             //lastDirection = lastdirection
             Direction lastDirection = direction;
@@ -195,11 +235,15 @@ public class Board {
 
     //randomizedroutine ( dlist)
     Direction randomizedDirection(ArrayList<Direction> directionArrayList) {
+        Direction direction;
+
         //If blank is touching wall
+
         //Remove directions that touch wall, add to removedlist
         //Pick a random number from 1-directionlist size
         //move(direction)
         //add directions from removedlist to directionlist, clear removedlist
+        return direction;
     }
 
     // TODO: solveAStar <heuristic>
@@ -212,9 +256,10 @@ public class Board {
         //TODO: PSUEDOCODE
     }
 
-    // TODO: maxNodes <n>
+    // maxNodes <n>
     private void maxNodes(int n) {
-        //TODO: PSUEDOCODE
+        //set max nodes = n
+        maxNodes = n;
     }
 
 }

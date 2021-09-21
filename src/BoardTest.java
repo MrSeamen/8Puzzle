@@ -34,9 +34,9 @@ class BoardTest {
     public void randomizeStateTest() {
         Random random = new Random();
         //randomize board, check to make sure board isnt the same as regular
-        assertNotEquals("012345678", board.randomizeState(random.nextInt(19)+1));
+        assertNotEquals("012345678", board.randomizeState(random.nextInt(19)+1), "");
     }
-
+/*
     public void solveAStarTest() {
         //set state to a simple solveable state
 
@@ -51,5 +51,5 @@ class BoardTest {
         //set state to a more complex but solveable state
 
         //set state to an unsolveable state
-    }
+    }*/
 }
