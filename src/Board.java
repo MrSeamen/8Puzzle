@@ -248,12 +248,47 @@ public class Board {
 
     // TODO: solveAStar <heuristic>
     void solveAStar(int heuristic) {
-        //TODO: PSUEDOCODE
+        //A* Search(problem)
+        //Open <- problem.start
+        //Closed
+        //CurrentNode <- problem.start
+        //While Open is not empty
+            //If CurrentNode = goal
+                //Return CurrentNode
+            //else
+                //Reached <- currentNode
+                //Open <- CurrentNode.children
+                //Remove CurrentNode from Open to closed
+                //highest
+                //For each in Open
+                    //If child is in closed
+                        //Then break
+                    //Calculate f(n) = g(n) +h(n)
+                    //If highest is empty
+                        //Then If CurrentNode.f(n) < child.f(n)
+                        //highest <- child
+                    //else if highest.f(n) < child.f(n)
+                        //highest <- child
+                    //else
+                        //move child to closed
+                //move currentNode to reached
+                //currentNode = highest
     }
 
     // TODO: solveBeam <k>
     void solveBeam(int k) {
-        //TODO: PSUEDOCODE
+        //state array of k size
+        //successor states list
+        //while goal not found
+            //for state in state array
+                //if state is goal state, return state
+                //else generate child
+                    // successor states <- child
+            //for each successor state
+                //best states array of k size
+                //if successor evaluation function > worst successor state evaluation function
+                    //remove worst state, add successor state
+            //clear successor state
     }
 
     // maxNodes <n>
