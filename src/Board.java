@@ -9,6 +9,7 @@ public class Board {
     private final String goalStringState = "012345678";
     private final LogClass logger = new LogClass(); //logger
     enum Direction {NORTH, SOUTH, EAST, WEST};
+    ArrayList<Direction> directions = new ArrayList<>();
     public int maxNodes;
 
     Board(int size) {
@@ -16,6 +17,10 @@ public class Board {
         assert side == (Math.sqrt(size)) : "Must have equal amount of blocks per side. (Perfect Square)";
         boardState = new int[side][side]; //representing puzzle
         total = size;
+        directions.add(Direction.NORTH);
+        directions.add(Direction.SOUTH);
+        directions.add(Direction.EAST);
+        directions.add(Direction.WEST);
     }
 
     public int[][] getBoardState() {
@@ -144,9 +149,9 @@ public class Board {
                 logger.log(LogClass.Methods.MOVE, "Null Input Given");
             }
         } catch(Exception e){
-            logger.log(LogClass.Methods.MOVE, "Unexpected Exception " + e + " at " + LogClass.Methods.MOVE);
+            logger.log(LogClass.Methods.MOVE, "Unexpected Exception " + e + " at " + LogClass.Methods.MOVE + " with direction " + direction);
         }
-        System.out.print(stringState);
+        //System.out.print(stringState);
         return stringState;
     }
 
@@ -196,6 +201,7 @@ public class Board {
                 validDirection = checkPosition(getBlankPosition(), 0, -1);
                 break;
         }
+        //System.out.println("checkDirections " + validDirection);
         return validDirection;
     }
 
@@ -213,51 +219,51 @@ public class Board {
     }
 
     boolean checkPosition(int[] blankPos, int vertical, int horizontal) {
-        int deltaX = blankPos[0] + horizontal;
-        int deltaY = blankPos[1] + vertical;
-        return ((0 <= deltaX || deltaX < side) && (0 <= deltaY || deltaY < side));
+        int deltaY = blankPos[0] + vertical;
+        int deltaX = blankPos[1] + horizontal;
+        //System.out.println("position: " + "vert: " + Integer.toString(blankPos[0]) + "+" + Integer.toString(vertical) + "=" + Integer.toString(deltaY) + " horz:"+ Integer.toString(blankPos[1]) + "+" + Integer.toString(horizontal) + "=" + Integer.toString(deltaX));
+        boolean returnValue = false;
+        if (horizontal == 1 || horizontal == -1) {
+            returnValue = (0 <= deltaX && deltaX < side);
+        } else if (vertical == 1 || vertical == -1) {
+            returnValue = (0 <= deltaY && deltaY < side);
+        }
+        return returnValue;
     }
 
     //randomizeState <n>
     public String randomizeState(int n) {
         try {
             //lastDirection = lastdirection
-            Direction lastDirection = null;
+            Direction lastPositionDirection = null;
             //newDirection = ""
             Direction newDirection;
             //directionlist of north south east west
             ArrayList<Direction> directionList = new ArrayList<>();
-            directionList.add(Direction.NORTH);
-            directionList.add(Direction.SOUTH);
-            directionList.add(Direction.EAST);
-            directionList.add(Direction.WEST);
-            //removedlist of “”
-            ArrayList<Direction> removedList = new ArrayList<>();
+
             //if last direction is not null
             if (Objects.nonNull(n)) {
                 for (int i = 0; i < n; i++) {
+                    System.out.println("Move " + (i+1) + ": " + getStringState());
                     //remove any nonvalid directions
-                    for(Direction d : directionList) {
-                        if(!checkDirections(d)) {
-                            removedList.add(d);
-                            directionList.remove(d);
+                    for(Direction d : directions) {
+                        //then remove last direction from direction list, add to removed list
+                        if (checkDirections(d) && d!=lastPositionDirection) {
+                            directionList.add(d);
                         }
                     }
-                    //then remove last direction from direction list, add to removed list
-                    if(directionList.contains(lastDirection)) {
-                        removedList.add(lastDirection);
-                        directionList.remove(lastDirection);
-                    }
+                    System.out.println(directionList.toString());
                     //routine takes (directionlist) and picks a direction
                     newDirection = randomizedDirection(directionList);
                     //move in direction
                     move(newDirection);
-                    lastDirection = newDirection;
-                    //readd directions
-                    for(Direction d : removedList) {
-                        directionList.add(d);
+                    switch(newDirection) {
+                        case EAST -> lastPositionDirection = Direction.WEST;
+                        case WEST -> lastPositionDirection = Direction.EAST;
+                        case NORTH -> lastPositionDirection = Direction.SOUTH;
+                        case SOUTH -> lastPositionDirection = Direction.NORTH;
                     }
-                    removedList.clear();
+                    directionList.clear();
                 }
             }
             //else
@@ -276,7 +282,7 @@ public class Board {
     Direction randomizedDirection(ArrayList<Direction> directionArrayList) {
         Random random = new Random();
         //Pick a random number from 1-directionlist size
-        int randomNum = random.nextInt(directionArrayList.size()-1);
+        int randomNum = random.nextInt(directionArrayList.size());
         return directionArrayList.get(randomNum);
     }
 
