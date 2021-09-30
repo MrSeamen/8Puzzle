@@ -7,7 +7,7 @@ public class InputReader {
         Board puzzle = new Board(9);
 
         System.out.println("Enter Directory and File name with file extension .txt");
-        System.out.println("Example C:\\Users\\userName\\textFile.txt");
+        System.out.println("*Example*: C:\\Users\\userName\\textFile.txt");
         String fileName = scan.nextLine();
         System.out.println("Executing following commands.");
         fileReader.readFile(fileName);
@@ -45,7 +45,7 @@ public class InputReader {
                 System.out.println("Randomizing...");
                 puzzle.randomizeState(Integer.parseInt(s.substring(15)));
             }
-            /*else if (s.startsWith("solve A-star")) {
+            else if (s.startsWith("solve A-star")) {
                 System.out.println("Using A-star search to solve...");
                 puzzle.solveAStar(Integer.parseInt(s.substring(13)));
             }
@@ -56,7 +56,7 @@ public class InputReader {
             else if (s.startsWith("maxNodes")) {
                 System.out.println("Setting max nodes allowed: " + s.substring(9));
                 puzzle.maxNodes(Integer.parseInt(s.substring(9)));
-            }*/
+            }
             else {
                 throw new IllegalArgumentException("Unknown command.");
             }
