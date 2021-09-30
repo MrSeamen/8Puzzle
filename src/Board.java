@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Objects;
-import java.util.Queue;
+import java.util.*;
 
 public class Board {
     private String stringState;
@@ -10,7 +7,7 @@ public class Board {
     private int[][] boardState; //state space
     private final int[][] goalState = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
     private final LogClass logger = new LogClass(); //logger
-    private enum Direction {NORTH, SOUTH, EAST, WEST};
+    enum Direction {NORTH, SOUTH, EAST, WEST};
     public int maxNodes;
 
     Board(int size) {
@@ -18,6 +15,14 @@ public class Board {
         assert side == (Math.sqrt(size)) : "Must have equal amount of blocks per side. (Perfect Square)";
         boardState = new int[side][side]; //representing puzzle
         total = size;
+    }
+
+    public int[][] getBoardState() {
+        return boardState;
+    }
+
+    public int[][] getGoalState() {
+        return goalState;
     }
 
     // setState <state>
@@ -41,7 +46,7 @@ public class Board {
 
         }
         catch (Exception e) {
-            logger.log(LogClass.Methods.SETSTATE, "Unexpected Exception");
+            logger.log(LogClass.Methods.SETSTATE, "Unexpected Exception " + e + " at " + LogClass.Methods.SETSTATE);
         }
         updateStringState(boardState);
         return stringState;
@@ -51,7 +56,7 @@ public class Board {
         updateStringState
         Helper method to update the String State
      */
-    private void updateStringState(int[][] state) {
+    void updateStringState(int[][] state) {
         stringState = ""; //clear state
         for (int row = 0; row < side; row++) {
             for (int col = 0; col < side; col++) {
@@ -65,7 +70,7 @@ public class Board {
         checkSequentialInput
         Helper method to setState
      */
-    private boolean checkSequentialInput(char[] state) {
+    boolean checkSequentialInput(char[] state) {
         for(char character : state) {
             int value = Integer.parseInt(Character.toString(character));
             if (0 > value || value > total) { //value is outside the range of what the algorithm is expected to do
@@ -79,17 +84,18 @@ public class Board {
         setValuesToBoard
         Helper method to setState
      */
-    private void setValuesToBoard(String state, char[] stateArray) {
+    void setValuesToBoard(String state, char[] stateArray) {
+        int counter = 0;
         for(int counterH = 0; counterH < side; counterH++) {
             for(int counterV = 0; counterV < side; counterV++) {
-                boardState[counterH][counterV] = Integer.parseInt(Character.toString(stateArray[(counterH+counterV)]));
+                boardState[counterH][counterV] = Integer.parseInt(Character.toString(stateArray[counter]));
+                counter++;
             }
         }
     }
 
     // printState
     public String printState() {
-        System.out.println("Raw Input: " + stringState);
         StringBuilder returnString = new StringBuilder();
         char[] stateArray = stringState.toCharArray();
         int counter = 0;
@@ -104,15 +110,15 @@ public class Board {
             else {
                 counter = 1;
                 //print “/n” + character + “ “
-                returnString.append("/n").append(c).append(" ");
+                returnString.append(" ").append(System.lineSeparator()).append(c).append(" ");
             }
         }
-        System.out.println("Formatted Output: " + returnString);
+        System.out.println("Formatted Output: \n" + returnString);
         return returnString.toString();
     }
 
-    // TODO: move <direction>
-    String move(Direction direction) {
+    // move <direction>
+    public String move(Direction direction) {
         try {
             //If direction is not null
             if (Objects.nonNull(direction)) {
@@ -121,6 +127,8 @@ public class Board {
                     //then swap blank with character in direction
                     swap(getBlankPosition(), direction);
                     //else
+                    this.printState();
+                    return stringState;
                 } else {
                     //error: invalid direction
                     logger.log(LogClass.Methods.MOVE, "Invalid Direction");
@@ -131,26 +139,40 @@ public class Board {
                 logger.log(LogClass.Methods.MOVE, "Null Input Given");
             }
         } catch(Exception e){
-            logger.log(LogClass.Methods.MOVE, "Unexpected Exception");
+            logger.log(LogClass.Methods.MOVE, "Unexpected Exception " + e + " at " + LogClass.Methods.MOVE);
         }
+        System.out.print(stringState);
         return stringState;
     }
 
-    void swap(int[] blankPos, Direction direction) {
+    void swap(int[] blankPosition, Direction direction) {
         switch(direction) {
             case NORTH:
-                validDirection = checkPosition(getBlankPosition(), 1, 0);
+                swapPosition(blankPosition, -1, 0);
                 break;
             case SOUTH:
-                validDirection = checkPosition(getBlankPosition(), -1, 0);
+                swapPosition(blankPosition, 1, 0);
                 break;
             case EAST:
-                validDirection = checkPosition(getBlankPosition(), 0, 1);
+                swapPosition(blankPosition, 0, 1);
                 break;
             case WEST:
-                validDirection = checkPosition(getBlankPosition(), 0, -1);
+                swapPosition(blankPosition, 0, -1);
                 break;
         }
+        System.out.println("Moved " + direction);
+    }
+
+    void swapPosition(int[] blankPos, int vertical, int horizontal) {
+        //System.out.println("blank" + boardState[blankPos[0]][blankPos[1]] + " at " + Integer.toString(blankPos[0]) + Integer.toString(blankPos[1]));
+        int holdingValue = boardState[blankPos[0] + vertical][blankPos[1] + horizontal];
+        //System.out.println("holding value" + holdingValue + " at " + Integer.toString(blankPos[0] + vertical) + Integer.toString(blankPos[1] + horizontal));
+        boardState[blankPos[0]][blankPos[1]] = holdingValue;
+        //System.out.println("confirmed move of holding value " + boardState[blankPos[0]][blankPos[1]] + " to " + Integer.toString(blankPos[0]) + Integer.toString(blankPos[1]));
+        boardState[blankPos[0] + vertical][blankPos[1] + horizontal] = 0;
+        //System.out.println("confirmed move of blank " + boardState[vertical + blankPos[0]][horizontal + blankPos[1]] + " to "+ Integer.toString(blankPos[0] + vertical) + Integer.toString(blankPos[1] + horizontal));
+        updateStringState(boardState);
+        //System.out.println(stringState);
     }
 
     boolean checkDirections(Direction direction) {
@@ -192,91 +214,115 @@ public class Board {
     }
 
     //randomizeState <n>
-    public String randomizeState(int n, Direction direction) {
+    public String randomizeState(int n) {
         try {
             //lastDirection = lastdirection
-            Direction lastDirection = direction;
+            Direction lastDirection = null;
             //newDirection = ""
             Direction newDirection;
             //directionlist of north south east west
             ArrayList<Direction> directionList = new ArrayList<>();
+            directionList.add(Direction.NORTH);
+            directionList.add(Direction.SOUTH);
+            directionList.add(Direction.EAST);
+            directionList.add(Direction.WEST);
             //removedlist of “”
-            Queue<Direction> removedList = new LinkedList<>();
-            //if n <= 0
-            if (n <= 0) {
-                //then return state
-                return stringState;
-                //else
-            } else {
-                //if last direction is not null
-                if (Objects.nonNull(direction)) {
+            ArrayList<Direction> removedList = new ArrayList<>();
+            //if last direction is not null
+            if (Objects.nonNull(n)) {
+                for (int i = 0; i < n; i++) {
+                    //remove any nonvalid directions
+                    for(Direction d : directionList) {
+                        if(!checkDirections(d)) {
+                            removedList.add(d);
+                            directionList.remove(d);
+                        }
+                    }
                     //then remove last direction from direction list, add to removed list
-                    directionList.remove(lastDirection);
-                    directionList.add(removedList.poll());
-                    removedList.add(lastDirection);
+                    if(directionList.contains(lastDirection)) {
+                        removedList.add(lastDirection);
+                        directionList.remove(lastDirection);
+                    }
                     //routine takes (directionlist) and picks a direction
                     newDirection = randomizedDirection(directionList);
                     //move in direction
                     move(newDirection);
-                    //randomizeState(n-1, lastdirection)
-                    randomizeState(n-1, lastDirection);
-                }
-                //else
-                else {
-                    //error
-                    logger.log(LogClass.Methods.RANDOMIZESTATE, "Null Input Given");
+                    lastDirection = newDirection;
+                    //readd directions
+                    for(Direction d : removedList) {
+                        directionList.add(d);
+                    }
+                    removedList.clear();
                 }
             }
+            //else
+            else {
+                //error
+                logger.log(LogClass.Methods.RANDOMIZESTATE, "Null Input Given");
+            }
         } catch(Exception e) {
-            logger.log(LogClass.Methods.SETSTATE, "Unexpected Exception");
+            logger.log(LogClass.Methods.SETSTATE, "Unexpected Exception + " + e + " at " + LogClass.Methods.RANDOMIZESTATE);
         }
+        updateStringState(boardState);
         return stringState;
     }
 
     //randomizedroutine ( dlist)
     Direction randomizedDirection(ArrayList<Direction> directionArrayList) {
-        Direction direction;
-
-        //If blank is touching wall
-
-        //Remove directions that touch wall, add to removedlist
+        Random random = new Random();
         //Pick a random number from 1-directionlist size
-        //move(direction)
-        //add directions from removedlist to directionlist, clear removedlist
-        return direction;
+        int randomNum = random.nextInt(3)+1;
+        return directionArrayList.get(randomNum);
     }
 
-    // TODO: solveAStar <heuristic>
-    void solveAStar(int heuristic) {
+    /*// solveAStar <heuristic>
+    public int[][] solveAStar(int heuristic) {
         //A* Search(problem)
         //Open <- problem.start
+        ArrayList<int[][]> Open = new ArrayList<>();
+        Open.add(getBoardState());
         //Closed
+        ArrayList<int[][]> Closed = new ArrayList<>();
+        //Reached
+        ArrayList<int[][]> Reached = new ArrayList<>();
         //CurrentNode <- problem.start
+        int[][] currentNode = getBoardState();
         //While Open is not empty
+        while (!Open.isEmpty()) {
             //If CurrentNode = goal
+            if (currentNode == goalState) {
                 //Return CurrentNode
+                return currentNode;
+            }
             //else
+            else {
                 //Reached <- currentNode
+                Reached.add(currentNode);
                 //Open <- CurrentNode.children
+                ArrayList<Direction> validDirection = new ArrayList<>();
+
+                for (int[][] child : nodeChildren)
                 //Remove CurrentNode from Open to closed
                 //highest
                 //For each in Open
-                    //If child is in closed
-                        //Then break
-                    //Calculate f(n) = g(n) +h(n)
-                    //If highest is empty
-                        //Then If CurrentNode.f(n) < child.f(n)
-                        //highest <- child
-                    //else if highest.f(n) < child.f(n)
-                        //highest <- child
-                    //else
-                        //move child to closed
+                //If child is in closed
+                //Then break
+                //Calculate f(n) = g(n) +h(n)
+                //If highest is empty
+                //Then If CurrentNode.f(n) < child.f(n)
+                //highest <- child
+                //else if highest.f(n) < child.f(n)
+                //highest <- child
+                //else
+                //move child to closed
                 //move currentNode to reached
                 //currentNode = highest
+            }
+        }
     }
 
     // TODO: solveBeam <k>
-    void solveBeam(int k) {
+    public void solveBeam(int k) {
         //state array of k size
         //successor states list
         //while goal not found
@@ -292,9 +338,8 @@ public class Board {
     }
 
     // maxNodes <n>
-    private void maxNodes(int n) {
+     public void maxNodes(int n) {
         //set max nodes = n
         maxNodes = n;
-    }
-
+    }*/
 }
