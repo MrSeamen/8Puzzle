@@ -24,25 +24,28 @@ public class BoardTest {
         assertEquals("312045678", board.setState("312045678"));
     }
 
+    //New Line character does not work properly when printing for some unknown reason, thus causing these tests to fail
     @Test
     public void printStateTest() {
         //set board as a custom arrangement, then test print
         board.setState("574638201");
-        assertEquals("5 7 4 \n6 3 8 \n2 0 1 ", board.printState());
+        assertEquals("5 7 4 " + System.lineSeparator() + "6 3 8 " + System.lineSeparator() + "2 0 1 ", board.printState());
         //set board as arrangement in order, then test print
         board.setState("012345678");
-        assertEquals("0 1 2 \n3 4 5 \n6 7 8 ", board.printState());
+        assertEquals("0 1 2 " + System.lineSeparator() + "3 4 5 " + System.lineSeparator() + "6 7 8 ", board.printState());
         //set board as above with one tiny change, then test print
         board.setState("312045678");
-        assertEquals("3 1 2 \n0 4 5 \n6 7 8 ", board.printState());
+        assertEquals("3 1 2 " + System.lineSeparator() + "0 4 5 " + System.lineSeparator() + "6 7 8 ", board.printState());
     }
 
     @Test
     public void randomizeStateTest() {
         Random random = new Random();
         board.setState("012345678");
+        int randomNum = random.nextInt(19)+1;
+        System.out.println("Randomize " + randomNum);
         //randomize board, check to make sure board isnt the same as regular
-        assertNotEquals("012345678", board.randomizeState(random.nextInt(19)+1));
+        assertNotEquals("012345678", board.randomizeState(randomNum));
     }
 
     @Test
@@ -56,23 +59,56 @@ public class BoardTest {
         board.setState("123405678");
         assertEquals("123045678", board.move(Board.Direction.WEST));
     }
-/*
 
     @Test
-    void solveAStar() {
+    public void solveAStar() {
         //set state to a simple solveable state
-
+        board.setState("012345678");
+        board.randomizeState(5);
+        assertEquals("012345678", board.solveAStar(1)); //Heuristic 1
+        board.setState("012345678");
+        board.randomizeState(5);
+        assertEquals("012345678", board.solveAStar(2)); //Heuristic 1
         //set state to a more complex but solveable state
-
+        board.setState("012345678");
+        board.randomizeState(20);
+        assertEquals("012345678", board.solveAStar(1));
+        board.setState("012345678");
+        board.randomizeState(20);
+        assertEquals("012345678", board.solveAStar(2));
+        //set state to a really complex but solveable state
+        board.setState("012345678");
+        board.randomizeState(50);
+        assertEquals("012345678", board.solveAStar(1));
+        board.setState("012345678");
+        board.randomizeState(50);
+        assertEquals("012345678", board.solveAStar(2));
         //set state to an unsolveable state
+        board.setState("123456780");
+        assertNotEquals("012345678", board.solveAStar(1));
+        assertNotEquals("012345678", board.solveAStar(2));
+
     }
 
     @Test
-    void solveBeam() {
+    public void solveBeam() {
         //set state to a simple solveable state
-
+        board.setState("012345678");
+        board.randomizeState(5);
+        board.solveBeam(4);
+        assertEquals("012345678", board.solveBeam(4));
         //set state to a more complex but solveable state
-
+        board.setState("012345678");
+        board.randomizeState(20);
+        board.solveBeam(4);
+        assertEquals("012345678", board.solveBeam(4));
+        //set state to a really complex but solveable state
+        board.setState("012345678");
+        board.randomizeState(50);
+        assertEquals("012345678", board.solveBeam(4));
+        board.solveBeam(4);
         //set state to an unsolveable state
-    }*/
+         board.setState("123456780");
+         assertNotEquals("012345678", board.solveBeam(4));
+    }
 }
