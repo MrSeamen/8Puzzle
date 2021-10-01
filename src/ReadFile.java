@@ -22,16 +22,6 @@ public class ReadFile {
         }
         list.forEach(System.out::println);
     }
-        /*try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                list.add(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
-
 
     public String getInput(int index) {
         return list.get(index);

@@ -529,7 +529,6 @@ public class Board {
         return false;
     }
 
-
     // solveBeam <k>
     public String solveBeam(int k) {
         //direction list

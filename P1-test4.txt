@@ -7,6 +7,6 @@ move down
 printState
 randomizeState 20
 printState
-solve A-star h1
+solve A-star 1
 
 

@@ -1,5 +1,5 @@
 setState b12 345 678
-maxNodes 10000000
+maxNodes 50
 move right
 move down
 move right
@@ -7,6 +7,6 @@ move down
 printState
 randomizeState 20
 printState
-solve A-star h2
+solve A-star 2
 
 
