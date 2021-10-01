@@ -16,7 +16,7 @@ public class InputReader {
         for (String s : fileReader.list) {
             if (s.startsWith("setState")) {
                 System.out.println("Setting State...");
-                puzzle.setState(s.substring(9).replace(" ", ""));
+                puzzle.setState(s.substring(9).replace(" ", "").replace("b", "0"));
             }
             else if (s.startsWith("printState")) {
                 System.out.println("Printing State...");
@@ -26,16 +26,16 @@ public class InputReader {
                 System.out.println("Moving...");
                 Board.Direction direction = null;
                 switch(s.substring(5)) {
-                    case "North" :
+                    case "up" :
                         direction = Board.Direction.NORTH;
                         break;
-                    case "South" :
+                    case "down" :
                         direction = Board.Direction.SOUTH;
                         break;
-                    case "East" :
+                    case "right" :
                         direction = Board.Direction.EAST;
                         break;
-                    case "West" :
+                    case "left" :
                         direction = Board.Direction.WEST;
                         break;
                 }

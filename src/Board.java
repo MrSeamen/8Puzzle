@@ -9,7 +9,7 @@ public class Board {
     private final int[][] goalState = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
     private final String goalStringState = "012345678";
     private final LogClass logger = new LogClass(); //logger
-    enum Direction {NORTH, SOUTH, EAST, WEST, INITIAL};
+    enum Direction {NORTH, SOUTH, EAST, WEST};
     ArrayList<Direction> directions = new ArrayList<>();
     public int maxNodes;
 
@@ -144,8 +144,9 @@ public class Board {
                     return stringState;
                 } else {
                     //error: invalid direction
-                    logger.log(LogClass.Methods.MOVE, "Invalid Direction");
+                    logger.log(LogClass.Methods.MOVE, "Invalid Direction: " + direction);
                     System.out.println("Could not move " + direction.toString() + ", move is not within board space.");
+                    this.printState();
                 }
             } else {
                 //error: direction given is null
@@ -154,7 +155,7 @@ public class Board {
         } catch(Exception e){
             logger.log(LogClass.Methods.MOVE, "Unexpected Exception " + e + " at " + LogClass.Methods.MOVE + " with direction " + direction);
         }
-        //System.out.print(stringState);
+        this.printState();
         return stringState;
     }
 
@@ -289,7 +290,6 @@ public class Board {
         return directionArrayList.get(randomNum);
     }
 
-
     private int calculateHueristic(Board board, int type) {
         int returnValue;
         if (type == 1) {
@@ -371,6 +371,7 @@ public class Board {
             return previousNode;
         }
 
+
         public Direction getMove() {
             return move;
         }
@@ -401,7 +402,7 @@ public class Board {
 
         //returns if this node is better than node n in f(n)
         public boolean compareTo(Node n) {
-            return (this.getCost() + this.getHeuristic() < n.getCost() + n.getHeuristic());
+            return ((this.getCost() + this.getHeuristic()) <= (n.getCost() + n.getHeuristic()));
         }
 
         @Override
@@ -433,7 +434,7 @@ public class Board {
                 ArrayList<Node> Reached = new ArrayList<>();
                 //While Open is not empty
                 while (!Open.isEmpty()) {
-                    if (!(Open.size() > maxNodes)) {
+                    if (!(Reached.size() > maxNodes)) {
                         for (Direction d : directions) {
                             //then remove last direction from direction list, add to removed list
                             if (checkDirections(d)) {
@@ -442,9 +443,9 @@ public class Board {
                         }
                         System.out.println(directionList);
                         //If CurrentNode = goal
-                        if (currentNode.getState().stringState.equals(goalStringState)) {
+                        if (currentNode.getState().getStringState().equals(getGoalStringState())) {
                             //Return CurrentNode
-                            return currentNode.getState().stringState;
+                            return currentNode.getState().getStringState();
                         }
                         //else
                         else {
@@ -456,51 +457,59 @@ public class Board {
                                 Open.add(new Node(currentNode.getState().move(d), currentNode, d, ++cost, heuristic));
                             }
                             //Remove CurrentNode from Open to closed
-                            System.out.println(Open.get(0).toString()); //SHOULD BE STARTING NODE AT FIRST/PARENT NODE
-                            Closed.add(currentNode);
-                        /*Open.remove(0);
-                        System.out.println("Evaluating Children...");
-                        ArrayList<Node> OpenCopy = new ArrayList<>(Open);
-                        System.out.println(OpenCopy);
-                        //For each in Open
-                        for(Node n : OpenCopy) {
-                            //If child is in closed
-                            //Calculate f(n) = g(n) +h(n)
-                            int f = n.getCost() + n.getHeuristic();
-                            //If highest is empty
-                            if (!Objects.nonNull(bestChoice)) {
-                                //Then If CurrentNode.f(n) < child.f(n)
-                                //highest <- child
-                                bestChoice = new Node(n.getState().getStringState(), n.getPreviousNode(), n.getMove(), n.getCost(), heuristic);
-                            } else
-                                //else if highest.f(n) > child.f(n)
-                                if ((bestChoice.getCost() + bestChoice.getHeuristic()) > f) {
+                            //System.out.println(Open.get(0).toString()); //SHOULD BE STARTING NODE AT FIRST/PARENT NODE
+                            Open.remove(currentNode);
+                            System.out.println("Evaluating Children...");
+                            ArrayList<Node> OpenCopy = new ArrayList<>(Open);
+                            //System.out.println(OpenCopy);
+                            //For each in Open
+                            for (Node n : OpenCopy) {
+                                //If child is in closed
+                                //Calculate f(n) = g(n) +h(n)
+                                int f = n.getCost() + n.getHeuristic();
+                                //System.out.println(n.getState().getStringState() + " " + f + " " + n.getCost() + " " + n.getHeuristic());
+                                //If highest is empty
+                                if (!Objects.nonNull(bestChoice)) {
+                                    //Then If CurrentNode.f(n) < child.f(n)
                                     //highest <- child
                                     bestChoice = new Node(n.getState().getStringState(), n.getPreviousNode(), n.getMove(), n.getCost(), heuristic);
+                                } else
+                                    //else if highest.f(n) > child.f(n)
+                                    if (n.compareTo(currentNode)) {
+                                        //highest <- child
+                                        bestChoice = new Node(n.getState().getStringState(), n.getPreviousNode(), n.getMove(), n.getCost(), heuristic);
+                                    }
+                                    //else
+                                    else {
+                                        //System.out.println(Open.peek().toString()); //SHOULD BE CHILD NODE
+                                        //move child to closed
+                                        Closed.add(n);
+                                        Open.remove(n);
+                                    }
                                 }
-                                //else
-                                else {
-                                    //System.out.println(Open.peek().toString()); //SHOULD BE CHILD NODE
-                                    //move child to closed
-                                    Closed.add(n);
-                                    Open.remove(n);
-                                    //move currentNode to reached
-                                    Reached.add(currentNode);
-                                    //currentNode = highest
-                                    currentNode = new Node(bestChoice.getState().getStringState(), bestChoice.getPreviousNode(), bestChoice.getMove(), bestChoice.getCost(), heuristic);
-                                }
-                            }
-                        OpenCopy.clear();
-                        System.out.println(bestChoice.getState().getStringState());*/
+                            //currentNode = highest
+                            currentNode = new Node(bestChoice.getState().getStringState(), bestChoice.getPreviousNode(), bestChoice.getMove(), bestChoice.getCost(), heuristic);
+                            //update state space
+                            move(currentNode.getMove());
+                            //move currentNode to reached
+                            Reached.add(new Node (currentNode.getState().getStringState(), currentNode.getPreviousNode(), currentNode.getMove(), currentNode.getCost(), heuristic));
+                            Open.remove(currentNode);
+                            //System.out.println(bestChoice.getState().getStringState());
+                            //clear working data
+                            OpenCopy.clear();
                             directionList.clear();
-                        }
-                    } else {
+                            bestChoice = null;
+
+                            printState();
+                            }
+                        } else {
                         logger.log(LogClass.Methods.SOLVEASTAR, "Max Nodes Reached: " + maxNodes);
                         Open.clear();
                     }
                 }
-                System.out.println("Current State " + bestChoice);
-                return bestChoice.toString();
+                System.out.println("Number of steps: " + Reached.size());
+                System.out.println("Current State " + currentNode.getState().printState());
+                return getStringState();
             } else {
                 //error
                 logger.log(LogClass.Methods.SOLVEASTAR, "Null Input Given");
@@ -508,8 +517,7 @@ public class Board {
         } catch (Exception e) {
             logger.log(LogClass.Methods.SOLVEASTAR, "Unexpected Exception " + e + " at " + LogClass.Methods.SOLVEASTAR);
         }
-        updateStringState(this.getBoardState());
-        return this.getStringState();
+        return getStringState();
     }
 
     boolean checkGoal(ArrayList<Node> nodeList) {
@@ -527,57 +535,102 @@ public class Board {
         //direction list
         ArrayList<Direction> directionList = new ArrayList<>();
         //state array of k size
-        ArrayList<Node> beam = new ArrayList<>(); //REMEMBER TO CHECK FOR MAX OF K NODES
+        ArrayList<Node> beam = new ArrayList<>(); //REMEMBER TO CHECK FOR MAX OF K
+        //arraylist of reached
+        ArrayList<Node> reached = new ArrayList<>();
         //cost
         int cost = 0;
         //successor states list
         ArrayList<Node> successors = new ArrayList<>();
         //initial
         Node initial = new Node(this.getStringState(), null, null, cost, 1);
+        boolean nodeBreak= false;
         beam.add(initial);
-        while (beam.size() + successors.size() <= maxNodes) {
+        try {
             //while goal not found
-            while (!checkGoal(successors)) {
-                //for state in state array
-                for (Node state : beam) {
+            while (!checkGoal(successors) || !nodeBreak) {
+                if (beam.size() + reached.size() <= maxNodes) {
                     for (Direction d : directions) {
                         //then remove last direction from direction list, add to removed list
                         if (checkDirections(d)) {
                             directionList.add(d);
                         }
                     }
-                    //if state is goal state, return state
-                    if (state.getState().getStringState().equals(getGoalStringState())) {
-                        return state.getState().getStringState();
-                    }
-                    //else generate child
-                    else {
-                        // successor states <- child
-                        for (Direction d : directionList) {
-                            successors.add(new Node(state.getState().getStringState(), state, d, ++cost, 1));
+                    //for state in state array
+                    for (Node state : beam) {
+                        for (Direction d : directions) {
+                            //then remove last direction from direction list, add to removed list
+                            if (checkDirections(d)) {
+                                directionList.add(d);
+                            }
                         }
-                    }
-                }
-                //for each successor state
-                for (Node child : successors) {
-                    //best states array of k size
-                    ArrayList<Node> bestStates = new ArrayList<>(); //REMEMBER TO KEEP UNDER MAXNODES SIZE
-                    //if successor evaluation function > worst successor state evaluation function
-                    if (bestStates.isEmpty() || bestStates.size() < k) {
-                        bestStates.add(child);
-                    } else if (bestStates.size() >= k) {
-                        //remove worst state, add successor state
-                        for (Node n : bestStates) {
-                            if (!n.compareTo(child)) {
-                                bestStates.add(child);
+                        //if state is goal state, return state
+                        if (state.getState().getStringState().equals(getGoalStringState())) {
+                            return state.getState().getStringState();
+                        }
+                        //else generate child
+                        else {
+                            // successor states <- child
+                            for (Direction d : directionList) {
+                                successors.add(new Node(state.getState().getStringState(), state, d, ++cost, 1));
                             }
                         }
                     }
+                    ArrayList<Node> bestStates = new ArrayList<>(); //REMEMBER TO KEEP UNDER MAXNODES SIZE
+                    //for each successor state
+                    for (Node child : successors) {
+                        //best states array of k size
+                        //if successor evaluation function > worst successor state evaluation function
+                        if (bestStates.isEmpty() || bestStates.size() < k) {
+                            bestStates.add(child);
+                        } else if (bestStates.size() >= k) {
+                            //remove worst state, add successor state
+                            Node lowest = null;
+                            for (Node n : bestStates) {
+                                if (!Objects.nonNull(lowest)) {
+                                    lowest = new Node(n.getState().getStringState(), n.getPreviousNode(), n.getMove(), n.getCost(), 1);
+                                } else {
+                                    if (!n.compareTo(lowest)) {
+                                        lowest = new Node(n.getState().getStringState(), n.getPreviousNode(), n.getMove(), n.getCost(), 1);
+                                    }
+                                }
+                            }
+                            bestStates.remove(lowest);
+                            bestStates.add(child);
+                        }
+                    }
+
+                    ArrayList<Node> worstStates = new ArrayList<>();
+                    ArrayList<Node> worstStatesCopy = new ArrayList<>();
+                    for (int i = 0; i < bestStates.size(); i++) {
+                        worstStates.add(beam.get(i));
+                    }
+                    beam.removeAll(worstStates);
+                    worstStatesCopy.addAll(worstStates);
+                    for (Node node : worstStatesCopy) {
+                        Node highest = new Node(node.getState().getStringState(), node.getPreviousNode(), node.getMove(), node.getCost(), 1);
+                        Node swap = null;
+                        for (Node n : beam) {
+                            if (node.compareTo(n)) {
+                                highest = new Node(node.getState().getStringState(), node.getPreviousNode(), node.getMove(), node.getCost(), 1);
+                                swap = new Node(n.getState().getStringState(), n.getPreviousNode(), n.getMove(), n.getCost(), 1);
+                            }
+                        }
+                        worstStates.remove(highest);
+                        beam.remove(swap);
+                        worstStates.add(swap);
+                        beam.add(highest);
+                    }
+                    directionList.clear();
                     //clear successor state
                     successors.clear();
+                } else {
+                    logger.log(LogClass.Methods.SOLVEBEAM, "Max Nodes Reached: " + maxNodes);
+                    nodeBreak = true;
                 }
-                return getStringState();
             }
+        } catch (Exception e) {
+            logger.log(LogClass.Methods.SOLVEBEAM, "Unexpected Exception " + e + " at " + LogClass.Methods.SOLVEBEAM);
         }
         return getStringState();
     }

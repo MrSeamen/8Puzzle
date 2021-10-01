@@ -93,7 +93,7 @@ public class BoardTest {
 
     @Test
     public void solveBeam() {
-        board.maxNodes(50);
+        board.maxNodes(200);
         //set state to a simple solveable state
         board.setState("012345678");
         board.randomizeState(5);

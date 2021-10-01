@@ -1,0 +1,12 @@
+setState b12 345 678
+maxNodes 10000000
+move right
+move down
+move right
+move down
+printState
+randomizeState 5
+printState
+solve beam 100000
+
+
