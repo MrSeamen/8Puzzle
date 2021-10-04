@@ -24,6 +24,10 @@ public class Board {
         directions.add(Direction.WEST);
     }
 
+    public int getSide() {
+        return side;
+    }
+
     public int[][] getBoardState() {
         return boardState;
     }

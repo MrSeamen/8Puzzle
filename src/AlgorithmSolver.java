@@ -4,16 +4,19 @@ import java.util.Objects;
 public class AlgorithmSolver {
     //max nodes
     private int maxNodes;
-    //current heuristic type
-    private int heuristicType;
+    //node count
+    private int nodeCount = 0;
+    //current board
+    private Board currentBoard;
+
     private final LogClass logger = new LogClass(); //logger
 
     public int getMaxNodes() {
         return maxNodes;
     }
 
-    public int getHeuristicType() {
-        return heuristicType;
+    public Board getCurrentBoard() {
+        return currentBoard;
     }
 
     private int calculateHueristic(Board board, int type) {
@@ -88,16 +91,35 @@ public class AlgorithmSolver {
 
     //node subclass - contains board, last move, path cost, heuristic cost, f(n) equation, and parent board
     public class Node {
-        private Board state = new Board(side*side);
-        private Node previousNode;
+        private Board state;
+        private Board parentState;
         private Board.Direction move;
-        private int cost;
-        private int heuristic;
+        private int pathCost;
+        private int heuristicCost;
+        private int heuristicType;
+        private int nodeID;
 
-        public Node getPreviousNode() {
-            return previousNode;
+        public Node(Board state, Board.Direction move, int pathCost, int heuristicCost, Board parentState, int heuristicType) {
+            assert Objects.nonNull(state) : "Current given board state is null";
+            this.state = new Board(state.getSide());
+            this.state.setState(state.getStringState());
+            if (!Objects.nonNull(parentState)) { //if initial state
+                this.parentState = null;
+            } else { //else child state
+                this.parentState = new Board(parentState.getSide());
+                this.parentState.setState(parentState.getStringState());
+            }
+            this.move = move;
+            this.pathCost = pathCost;
+            assert heuristicCost == calculateHueristic(state, heuristicType) : "Heuristic Calculation is incorrectly matched to heuristic type";
+            this.heuristicCost = heuristicCost;
+            this.heuristicType = heuristicType;
+            nodeID = nodeCount++;
         }
 
+        public int getHeuristicType() {
+            return heuristicType;
+        }
 
         public Board.Direction getMove() {
             return move;
@@ -107,36 +129,36 @@ public class AlgorithmSolver {
             return state;
         }
 
-        public int getCost() {
-            return cost;
+        public int getPathCost() {
+            return pathCost;
         }
 
-        public int getHeuristic() {
-            return heuristic;
+        public int getHeuristicCost() {
+            return heuristicCost;
         }
 
-        public Node(String stringState, Node previousNode, Board.Direction move, int cost, int heuristic) {
-            state.setState(stringState);
-            if (Objects.nonNull(previousNode)) {
-                this.previousNode = new Node(previousNode.getState().getStringState(), previousNode.getPreviousNode(), previousNode.getMove(), previousNode.getCost(), previousNode.getHeuristic());
-            } else {
-                this.previousNode = null;
-            }
-            this.move = move;
-            this.cost = cost;
-            this.heuristic = calculateHueristic(state, heuristic);
+        public int getNodeID() {
+            return nodeID;
         }
 
         //returns if this node is better than node n in f(n)
         public boolean compareTo(Node n) {
-            return ((this.getCost() + this.getHeuristic()) <= (n.getCost() + n.getHeuristic()));
+            return ((this.getPathCost() + this.getHeuristicCost()) <= (n.getPathCost() + n.getHeuristicCost()));
         }
 
         @Override
         public String toString() {
-            return "State: " + state.getStringState() + " Previous Node: " + getPreviousNode() + " Move: " + getMove() + " Cost: " + getCost() + " Heuristic: " + getHeuristic();
+            return "State: " + state.getStringState() + System.lineSeparator() +
+                    "Previous Node: " + System.lineSeparator() + getState().printState() + System.lineSeparator() +
+                    "Move: " + getMove() + System.lineSeparator() +
+                    "Cost: " + getPathCost() + System.lineSeparator() +
+                    "Heuristic Type: " + getHeuristicType() + System.lineSeparator() +
+                    "Heuristic: " + getHeuristicCost() + System.lineSeparator() +
+                    "Node ID: " + getNodeID();
         }
     }
+
+    // TODO: redo the algorithms to fit algorithmsolver
 
     // solveAStar <heuristic>
     public String solveAStar(int heuristic) {
