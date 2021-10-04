@@ -6,12 +6,11 @@ public class Board {
     private final int side; //number of tiles per side
     private final int total; //total amount of boxes
     private int[][] boardState; //state space
-    private final int[][] goalState = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
-    private final String goalStringState = "012345678";
+    private int[][] goalState;
+    private String goalStringState;
     private final LogClass logger = new LogClass(); //logger
     enum Direction {NORTH, SOUTH, EAST, WEST};
     ArrayList<Direction> directions = new ArrayList<>();
-    public int maxNodes;
 
     Board(int size) {
         side = (int)Math.sqrt((size));
@@ -22,6 +21,30 @@ public class Board {
         directions.add(Direction.SOUTH);
         directions.add(Direction.EAST);
         directions.add(Direction.WEST);
+        makeGoalState(side);
+        makeGoalStringState(side);
+    }
+
+    private void makeGoalState(int side) {
+        int totalBoxes = side*side;
+        int counter = 0;
+        goalState = new int [side][side];
+        for (int row = 0; row < side; row++) {
+            for (int col = 0; col < side; col++) {
+                if (counter < totalBoxes) {
+                    goalState[row][col] = counter++;
+                }
+            }
+        }
+    }
+
+    private void makeGoalStringState(int side) {
+        int totalBoxes = side*side;
+        String returnString = "";
+        for (int i = 0; i < totalBoxes; i++) {
+            returnString += i;
+        }
+        goalStringState = returnString;
     }
 
     public int getSide() {
