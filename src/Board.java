@@ -9,7 +9,7 @@ public class Board {
     private int[][] goalState;
     private String goalStringState;
     private final LogClass logger = new LogClass(); //logger
-    enum Direction {NORTH, SOUTH, EAST, WEST};
+    enum Direction {NORTH, SOUTH, EAST, WEST, INITIAL, FINAL};
     ArrayList<Direction> directions = new ArrayList<>();
 
     Board(int size) {
@@ -23,6 +23,14 @@ public class Board {
         directions.add(Direction.WEST);
         makeGoalState(side);
         makeGoalStringState(side);
+    }
+
+    public ArrayList<Direction> getCardinalDirections() {
+        return directions;
+    }
+
+    public int getTotal() {
+        return total;
     }
 
     private void makeGoalState(int side) {
@@ -150,7 +158,7 @@ public class Board {
             else {
                 counter = 1;
                 //print “/n” + character + “ “
-                returnString.append(" ").append(System.lineSeparator()).append(c).append(" ");
+                returnString.append(System.lineSeparator()).append(c).append(" ");
             }
         }
         System.out.println("Formatted Output: \n" + returnString);

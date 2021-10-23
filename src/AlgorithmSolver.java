@@ -37,50 +37,49 @@ public class AlgorithmSolver {
             int distance = 0;
             int a = 0;
             int b = 0 ;
-            for (int k = 0; k < (side*side); k++) {
-                for (int i = 0; i < side; i++) {
-                    for (int j = 0; j < side; j++) {
-                        if (board.getBoardState()[i][j] != k) {
-                            switch(k) {
-                                case 0:
-                                    a = 0;
-                                    b = 0;
-                                    break;
-                                case 1:
-                                    a = 0;
-                                    b = 1;
-                                    break;
-                                case 2:
-                                    a = 0;
-                                    b = 2;
-                                    break;
-                                case 3:
-                                    a = 1;
-                                    b = 0;
-                                    break;
-                                case 4:
-                                    a = 1;
-                                    b = 1;
-                                    break;
-                                case 5:
-                                    a = 1;
-                                    b = 2;
-                                    break;
-                                case 6:
-                                    a = 2;
-                                    b = 0;
-                                    break;
-                                case 7:
-                                    a = 2;
-                                    b = 1;
-                                    break;
-                                case 8:
-                                    a = 2;
-                                    b = 2;
-                                    break;
-                            }
-                            distance += Math.abs(j - b) + Math.abs(i - a);
+            for (int k = 0; k < (board.getSide()*board.getSide()); k++) {
+                for (int i = 0; i < board.getSide(); i++) {
+                    for (int j = 0; j < board.getSide(); j++) {
+                        switch(k) {
+                            case 0:
+                                a = 0;
+                                b = 0;
+                                break;
+                            case 1:
+                                a = 0;
+                                b = 1;
+                                break;
+                            case 2:
+                                a = 0;
+                                b = 2;
+                                break;
+                            case 3:
+                                a = 1;
+                                b = 0;
+                                break;
+                            case 4:
+                                a = 1;
+                                b = 1;
+                                break;
+                            case 5:
+                                a = 1;
+                                b = 2;
+                                break;
+                            case 6:
+                                a = 2;
+                                b = 0;
+                                break;
+                            case 7:
+                                a = 2;
+                                b = 1;
+                                break;
+                            case 8:
+                                a = 2;
+                                b = 2;
+                                break;
                         }
+                        distance += Math.abs(j - b) + Math.abs(i - a);
+
                     }
                 }
             }
@@ -89,30 +88,34 @@ public class AlgorithmSolver {
         return returnValue;
     }
 
+    public void setCurrentBoard(String boardState) {
+        currentBoard = new Board((int) Math.sqrt(boardState.length()));
+        currentBoard.setState(boardState);
+    }
+
     //node subclass - contains board, last move, path cost, heuristic cost, f(n) equation, and parent board
     public class Node {
-        private Board state;
-        private Board parentState;
+        private String parentState;
         private Board.Direction move;
         private int pathCost;
         private int heuristicCost;
         private int heuristicType;
         private int nodeID;
+        private Board state;
 
-        public Node(Board state, Board.Direction move, int pathCost, int heuristicCost, Board parentState, int heuristicType) {
+        public Node(String state, Board.Direction move, int pathCost, String parentState, int heuristicType) {
             assert Objects.nonNull(state) : "Current given board state is null";
-            this.state = new Board(state.getSide());
-            this.state.setState(state.getStringState());
+            this.state = new Board((int)Math.sqrt(state.length()));
+            this.state.setState(state);
             if (!Objects.nonNull(parentState)) { //if initial state
                 this.parentState = null;
             } else { //else child state
-                this.parentState = new Board(parentState.getSide());
-                this.parentState.setState(parentState.getStringState());
+                this.parentState = parentState;
             }
             this.move = move;
             this.pathCost = pathCost;
-            assert heuristicCost == calculateHueristic(state, heuristicType) : "Heuristic Calculation is incorrectly matched to heuristic type";
-            this.heuristicCost = heuristicCost;
+            assert heuristicCost == calculateHueristic(this.state, heuristicType) : "Heuristic Calculation is incorrectly matched to heuristic type";
+            this.heuristicCost = calculateHueristic(this.state, heuristicType);
             this.heuristicType = heuristicType;
             nodeID = nodeCount++;
         }
@@ -128,6 +131,8 @@ public class AlgorithmSolver {
         public Board getState() {
             return state;
         }
+
+        public String getParentState() { return parentState; }
 
         public int getPathCost() {
             return pathCost;
@@ -148,12 +153,12 @@ public class AlgorithmSolver {
 
         @Override
         public String toString() {
-            return "State: " + state.getStringState() + System.lineSeparator() +
-                    "Previous Node: " + System.lineSeparator() + getState().printState() + System.lineSeparator() +
+            return "State: " + getState().getStringState() + System.lineSeparator() +
+                    "Previous Node: " + System.lineSeparator() + getParentState() + System.lineSeparator() +
                     "Move: " + getMove() + System.lineSeparator() +
-                    "Cost: " + getPathCost() + System.lineSeparator() +
+                    "Path Cost: " + getPathCost() + System.lineSeparator() +
                     "Heuristic Type: " + getHeuristicType() + System.lineSeparator() +
-                    "Heuristic: " + getHeuristicCost() + System.lineSeparator() +
+                    "Heuristic Value: " + getHeuristicCost() + System.lineSeparator() +
                     "Node ID: " + getNodeID();
         }
     }
@@ -173,7 +178,7 @@ public class AlgorithmSolver {
                 //Open <- problem.start
                 ArrayList<Node> Open = new ArrayList<>();
                 //CurrentNode <- problem.start
-                Node currentNode = new Node(this.stringState, null, null, cost, heuristic);
+                Node currentNode = new Node(getCurrentBoard().getStringState(), Board.Direction.INITIAL, cost, null, heuristic);
                 Open.add(currentNode);
                 //highest
                 Node bestChoice = null;
@@ -184,15 +189,15 @@ public class AlgorithmSolver {
                 //While Open is not empty
                 while (!Open.isEmpty()) {
                     if (!(Reached.size() > maxNodes)) {
-                        for (Board.Direction d : directions) {
+                        for (Board.Direction d : currentNode.getState().getCardinalDirections()) {
                             //then remove last direction from direction list, add to removed list
-                            if (checkDirections(d)) {
+                            if (currentNode.getState().checkDirections(d)) {
                                 directionList.add(d);
                             }
                         }
                         System.out.println(directionList);
                         //If CurrentNode = goal
-                        if (currentNode.getState().getStringState().equals(getGoalStringState())) {
+                        if (currentNode.getState().getStringState().equals(currentNode.getState().getGoalStringState())) {
                             //Return CurrentNode
                             return currentNode.getState().getStringState();
                         }
@@ -203,7 +208,9 @@ public class AlgorithmSolver {
                             //Open <- CurrentNode.
                             System.out.println("Creating Children...");
                             for (Board.Direction d : directionList) {
-                                Open.add(new Node(currentNode.getState().move(d), currentNode, d, ++cost, heuristic));
+                                Board child = new Board(currentNode.getState().getTotal());
+                                child.setState(currentNode.getState().getStringState());
+                                Open.add(new Node( child.move(d), d, ++cost, currentNode.getState().getStringState(), heuristic));
                             }
                             //Remove CurrentNode from Open to closed
                             //System.out.println(Open.get(0).toString()); //SHOULD BE STARTING NODE AT FIRST/PARENT NODE
@@ -215,18 +222,18 @@ public class AlgorithmSolver {
                             for (Node n : OpenCopy) {
                                 //If child is in closed
                                 //Calculate f(n) = g(n) +h(n)
-                                int f = n.getCost() + n.getHeuristic();
+                                int f = n.getPathCost() + n.getHeuristicCost();
                                 //System.out.println(n.getState().getStringState() + " " + f + " " + n.getCost() + " " + n.getHeuristic());
                                 //If highest is empty
                                 if (!Objects.nonNull(bestChoice)) {
                                     //Then If CurrentNode.f(n) < child.f(n)
                                     //highest <- child
-                                    bestChoice = new Node(n.getState().getStringState(), n.getPreviousNode(), n.getMove(), n.getCost(), heuristic);
+                                    bestChoice = new Node(n.getState().getStringState(), n.getMove(), n.getPathCost(), n.getParentState(), heuristic);
                                 } else
                                     //else if highest.f(n) > child.f(n)
                                     if (n.compareTo(currentNode)) {
                                         //highest <- child
-                                        bestChoice = new Node(n.getState().getStringState(), n.getPreviousNode(), n.getMove(), n.getCost(), heuristic);
+                                        bestChoice = new Node(n.getState().getStringState(), n.getMove(), n.getPathCost(), n.getParentState(), heuristic);
                                     }
                                     //else
                                     else {
@@ -237,11 +244,11 @@ public class AlgorithmSolver {
                                     }
                             }
                             //currentNode = highest
-                            currentNode = new Node(bestChoice.getState().getStringState(), bestChoice.getPreviousNode(), bestChoice.getMove(), bestChoice.getCost(), heuristic);
+                            currentNode = new Node(bestChoice.getState().getStringState(), bestChoice.getMove(), bestChoice.getPathCost(), bestChoice.getParentState(), heuristic);
                             //update state space
-                            move(currentNode.getMove());
+                            currentBoard.move(currentNode.getMove());
                             //move currentNode to reached
-                            Reached.add(new Node (currentNode.getState().getStringState(), currentNode.getPreviousNode(), currentNode.getMove(), currentNode.getCost(), heuristic));
+                            Reached.add(new Node (currentNode.getState().getStringState(), currentNode.getMove(), currentNode.getPathCost(), currentNode.getParentState(), heuristic));
                             Open.remove(currentNode);
                             //System.out.println(bestChoice.getState().getStringState());
                             //clear working data
@@ -249,7 +256,7 @@ public class AlgorithmSolver {
                             directionList.clear();
                             bestChoice = null;
 
-                            printState();
+                            currentBoard.printState();
                         }
                     } else {
                         logger.log(LogClass.Methods.SOLVEASTAR, "Max Nodes Reached: " + maxNodes);
@@ -258,7 +265,7 @@ public class AlgorithmSolver {
                 }
                 System.out.println("Number of steps: " + Reached.size());
                 System.out.println("Current State " + currentNode.getState().printState());
-                return getStringState();
+                return currentBoard.getStringState();
             } else {
                 //error
                 logger.log(LogClass.Methods.SOLVEASTAR, "Null Input Given");
@@ -266,18 +273,18 @@ public class AlgorithmSolver {
         } catch (Exception e) {
             logger.log(LogClass.Methods.SOLVEASTAR, "Unexpected Exception " + e + " at " + LogClass.Methods.SOLVEASTAR);
         }
-        return getStringState();
+        return currentBoard.getStringState();
     }
 
     boolean checkGoal(ArrayList<Node> nodeList) {
         for (Node n : nodeList) {
-            if (n.getState().getStringState().equals(getGoalStringState())) {
+            if (n.getState().getStringState().equals(currentBoard.getGoalStringState())) {
                 return true;
             }
         }
         return false;
     }
-
+/*
     // solveBeam <k>
     public String solveBeam(int k) {
         //direction list
@@ -291,7 +298,7 @@ public class AlgorithmSolver {
         //successor states list
         ArrayList<Node> successors = new ArrayList<>();
         //initial
-        Node initial = new Node(this.getStringState(), null, null, cost, 1);
+        Node initial = new Node(currentBoard.getStringState(), Board.Direction.INITIAL, 0, null, 1);
         boolean nodeBreak= false;
         beam.add(initial);
         try {
@@ -382,6 +389,7 @@ public class AlgorithmSolver {
         }
         return getStringState();
     }
+    */
 
     // maxNodes <n>
     public void maxNodes(int n) {
