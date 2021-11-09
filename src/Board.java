@@ -156,10 +156,11 @@ public class Board {
             }
             //else
             else {
-                counter = 1;
+                counter = 0;
                 //print “/n” + character + “ “
                 returnString.append(System.lineSeparator()).append(c).append(" ");
             }
+            counter++;
         }
         System.out.println("Formatted Output: \n" + returnString);
         return returnString.toString();

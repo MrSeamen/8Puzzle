@@ -92,7 +92,7 @@ public class AlgorithmSolver {
         currentBoard.setState(boardState);
     }
 
-    //node subclass - contains board, last move, path cost, heuristic cost, f(n) equation, and parent board
+    //node subclass - contains board state, last move, path cost, heuristic cost amd type, parent state, and ID
     public class Node {
         private String parentState;
         private Board.Direction move; // move that got to this position
