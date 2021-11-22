@@ -6,8 +6,6 @@ public class Board {
     private final int side; //number of tiles per side
     private final int total; //total amount of boxes
     private int[][] boardState; //state space
-    private int[][] goalState;
-    private String goalStringState;
     private final LogClass logger = new LogClass(); //logger
     enum Direction {NORTH, SOUTH, EAST, WEST, INITIAL, FINAL};
     ArrayList<Direction> directions = new ArrayList<>();
@@ -23,36 +21,6 @@ public class Board {
         directions.add(Direction.WEST);
         makeGoalState(side);
         makeGoalStringState(side);
-    }
-
-    public ArrayList<Direction> getCardinalDirections() {
-        return directions;
-    }
-
-    public int getTotal() {
-        return total;
-    }
-
-    private void makeGoalState(int side) {
-        int totalBoxes = side*side;
-        int counter = 0;
-        goalState = new int [side][side];
-        for (int row = 0; row < side; row++) {
-            for (int col = 0; col < side; col++) {
-                if (counter < totalBoxes) {
-                    goalState[row][col] = counter++;
-                }
-            }
-        }
-    }
-
-    private void makeGoalStringState(int side) {
-        int totalBoxes = side*side;
-        String returnString = "";
-        for (int i = 0; i < totalBoxes; i++) {
-            returnString += i;
-        }
-        goalStringState = returnString;
     }
 
     public int getSide() {
@@ -176,13 +144,13 @@ public class Board {
                     //then swap blank with character in direction
                     swap(getBlankPosition(), direction);
                     //else
-                    this.printState();
+                    //this.printState();
                     return stringState;
                 } else {
                     //error: invalid direction
                     logger.log(LogClass.Methods.MOVE, "Invalid Direction: " + direction);
-                    System.out.println("Could not move " + direction.toString() + ", move is not within board space.");
-                    this.printState();
+                    //System.out.println("Could not move " + direction.toString() + ", move is not within board space.");
+                    //this.printState();
                 }
             } else {
                 //error: direction given is null
@@ -191,7 +159,7 @@ public class Board {
         } catch(Exception e){
             logger.log(LogClass.Methods.MOVE, "Unexpected Exception " + e + " at " + LogClass.Methods.MOVE + " with direction " + direction);
         }
-        this.printState();
+        //this.printState();
         return stringState;
     }
 
@@ -210,7 +178,7 @@ public class Board {
                 swapPosition(blankPosition, 0, -1);
                 break;
         }
-        System.out.println("Moved " + direction);
+        //System.out.println("Moved " + direction);
     }
 
     void swapPosition(int[] blankPos, int vertical, int horizontal) {
@@ -226,23 +194,14 @@ public class Board {
     }
 
     boolean checkDirections(Direction direction) {
-        boolean validDirection = false;
-        switch(direction) {
-            case NORTH:
-                validDirection = checkPosition(getBlankPosition(), -1, 0);
-                break;
-            case SOUTH:
-                validDirection = checkPosition(getBlankPosition(), 1, 0);
-                break;
-            case EAST:
-                validDirection = checkPosition(getBlankPosition(), 0, 1);
-                break;
-            case WEST:
-                validDirection = checkPosition(getBlankPosition(), 0, -1);
-                break;
-        }
         //System.out.println("checkDirections " + validDirection);
-        return validDirection;
+        return switch (direction) {
+            case NORTH -> checkPosition(getBlankPosition(), -1, 0);
+            case SOUTH -> checkPosition(getBlankPosition(), 1, 0);
+            case EAST -> checkPosition(getBlankPosition(), 0, 1);
+            case WEST -> checkPosition(getBlankPosition(), 0, -1);
+            default -> false;
+        };
     }
 
     int[] getBlankPosition() {
@@ -281,10 +240,12 @@ public class Board {
             //directionlist of north south east west
             ArrayList<Direction> directionList = new ArrayList<>();
 
+            ArrayList<Direction> path = new ArrayList<>();
+
             //if last direction is not null
             if (Objects.nonNull(n)) {
                 for (int i = 0; i < n; i++) {
-                    System.out.println("Move " + (i+1) + ": " + getStringState());
+                    //System.out.println("Move " + (i+1) + ": " + getStringState());
                     //remove any nonvalid directions
                     for(Direction d : directions) {
                         //then remove last direction from direction list, add to removed list
@@ -292,9 +253,10 @@ public class Board {
                             directionList.add(d);
                         }
                     }
-                    System.out.println(directionList.toString());
+                    //System.out.println(directionList.toString());
                     //routine takes (directionlist) and picks a direction
                     newDirection = randomizedDirection(directionList);
+                    path.add(newDirection);
                     //move in direction
                     move(newDirection);
                     switch(newDirection) {
@@ -311,6 +273,7 @@ public class Board {
                 //error
                 logger.log(LogClass.Methods.RANDOMIZESTATE, "Null Input Given");
             }
+            System.out.println("Path: " + path);
         } catch(Exception e) {
             logger.log(LogClass.Methods.RANDOMIZESTATE, "Unexpected Exception " + e + " at " + LogClass.Methods.RANDOMIZESTATE);
         }

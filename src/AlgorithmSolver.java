@@ -1,22 +1,20 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.PriorityQueue;
 
 public class AlgorithmSolver {
     //max nodes
     private int maxNodes;
     //node count
-    private int nodeCount = 0;
-    //current board
-    private Board currentBoard;
+    private int nodeID;
+
+    private String goalStringState;
 
     private final LogClass logger = new LogClass(); //logger
 
     public int getMaxNodes() {
         return maxNodes;
-    }
-
-    public Board getCurrentBoard() {
-        return currentBoard;
     }
 
     private int calculateHueristic(Board board, int type) {
@@ -87,146 +85,166 @@ public class AlgorithmSolver {
         return returnValue;
     }
 
-    public void setCurrentBoard(String boardState) {
-        currentBoard = new Board(boardState.length());
-        currentBoard.setState(boardState);
+    private void makeGoalState(int side) {
+        int totalBoxes = side*side;
+        int counter = 0;
+        goalState = new int [side][side];
+        for (int row = 0; row < side; row++) {
+            for (int col = 0; col < side; col++) {
+                if (counter < totalBoxes) {
+                    goalState[row][col] = counter++;
+                }
+            }
+        }
+    }
+
+    private void makeGoalStringState(int side) {
+        int totalBoxes = side*side;
+        String returnString = "";
+        for (int i = 0; i < totalBoxes; i++) {
+            returnString += i;
+        }
+        goalStringState = returnString;
     }
 
     //node subclass - contains board state, last move, path cost, heuristic cost amd type, parent state, and ID
     public class Node {
-        private String parentState;
-        private Board.Direction move; // move that got to this position
-        private int pathCost;
-        private int heuristicCost;
-        private int heuristicType;
-        private int nodeID;
-        private Board state;
+        private final Board state;
+        private final Board.Direction move; // move that got to this position
+        private final Board parentState;
+        private final int pathCost;
+        private final int heuristicCost;
+        private final int evalFunction;
+        private final int nodeID;
 
-        public Node(String stringState, Board.Direction move, int pathCost, String parentState, int heuristicType) {
-            assert Objects.nonNull(stringState) : "Current given board state is null";
-            state = new Board(stringState.length());
-            state.setState(stringState);
-            if (!Objects.nonNull(parentState)) { //if initial state
-                this.parentState = null;
-            } else { //else child state
-                this.parentState = parentState;
-            }
+        public Node(String currentState, Board.Direction move, int pathCost, int heuristicCost, int nodeID) {
+            state = new Board(currentState.length());
+            state.setState(currentState);
             this.move = move;
+            parentState = new Board(currentState.length());
+            parentState.setState(currentState);
+            switch(move) {
+                case NORTH:
+                    parentState.move(Board.Direction.SOUTH);
+                case SOUTH:
+                    parentState.move(Board.Direction.NORTH);
+                case EAST:
+                    parentState.move(Board.Direction.WEST);
+                case WEST:
+                    parentState.move(Board.Direction.EAST);
+            }
             this.pathCost = pathCost;
-            this.heuristicCost = calculateHueristic(state, heuristicType);
-            this.heuristicType = heuristicType;
-            nodeID = nodeCount++;
+            this.heuristicCost = heuristicCost;
+            evalFunction = pathCost + heuristicCost;
+            this.nodeID = nodeID;
         }
 
-        public int getHeuristicType() {
-            return heuristicType;
+        public String getCurrentState() {
+            return state.getStringState();
         }
-
-        public Board.Direction getMove() {
-            return move;
-        }
-
-        public Board getState() {
-            return state;
-        }
-
-        public String getParentState() { return parentState; }
 
         public int getPathCost() {
             return pathCost;
         }
 
-        public int getHeuristicCost() {
-            return heuristicCost;
-        }
-
-        public int getNodeID() {
-            return nodeID;
-        }
-
-        //returns if this node is better than node n in f(n)
-        public boolean compareTo(Node n) {
-            return ((this.getPathCost() + this.getHeuristicCost()) <= (n.getPathCost() + n.getHeuristicCost()));
+        public int getEvalFunction() {
+            return evalFunction;
         }
 
         @Override
         public String toString() {
-            return "State: " + getState().getStringState() + System.lineSeparator() +
-                    "Previous Node: " + System.lineSeparator() + getParentState() + System.lineSeparator() +
-                    "Move: " + getMove() + System.lineSeparator() +
-                    "Path Cost: " + getPathCost() + System.lineSeparator() +
-                    "Heuristic Type: " + getHeuristicType() + System.lineSeparator() +
-                    "Heuristic Value: " + getHeuristicCost() + System.lineSeparator() +
-                    "Node ID: " + getNodeID();
+            return "State: " + state.getStringState() + System.lineSeparator() +
+                    "Previous Node: " + parentState.getStringState() + System.lineSeparator() +
+                    "Move: " + move + System.lineSeparator() +
+                    "Path Cost: " + pathCost + System.lineSeparator() +
+                    "Heuristic Value: " + heuristicCost + System.lineSeparator() +
+                    "Evaluation Function: " + evalFunction + System.lineSeparator() +
+                    "Node ID: " + nodeID;
+        }
+    }
+
+    public class nodeComparator implements Comparator<Node> {
+        @Override
+        public int compare(Node node1, Node node2) {
+            if (node1.getEvalFunction() > node2.getEvalFunction()) {
+                return 1;
+            } else (node1.getEvalFunction() < node2.getEvalFunction()){
+                return -1;
+            }
+            return 0;
         }
     }
 
     // solveAStar <heuristic>
-    public String solveAStar(int heuristic) {
+    public String solveAStar(Board startingBoard, int heuristic) {
+        //make goal state
+        String goalState = new Board(startingBoard.getStringState().length()).getGoalStringState();
         //A* Search(problem)
         try {
-            if (Objects.nonNull(heuristic) && Objects.nonNull(maxNodes)) {
+            if (Objects.nonNull(heuristic) && Objects.nonNull(startingBoard) && Objects.nonNull(maxNodes)) {
                 System.out.println("Solving with A* with heuristic " + heuristic);
-                //direction list
-                ArrayList<Board.Direction> directionList = new ArrayList<>();
                 //path cost from parent
+                nodeID = 0;
                 int cost = 0;
-                //Open <- problem.start
-                ArrayList<Node> Open = new ArrayList<>();
-                //CurrentNode <- problem.start
-                Node currentNode = new Node(getCurrentBoard().getStringState(), Board.Direction.INITIAL, cost, null, heuristic);
-                Open.add(currentNode);
-                //highest
-                Node bestChoice = null;
-                //Closed
+                //Open <- problem.start // Accessible at current state
+                PriorityQueue<Node> Open = new PriorityQueue<>(new nodeComparator());
+                //Closed  - Opened but not used or accessible at current state
                 ArrayList<Node> Closed = new ArrayList<>();
-                //Reached
+                //Reached - Part of path
                 ArrayList<Node> Reached = new ArrayList<>();
+                //CurrentNode <- problem.start
+                Node currentNode = new Node(startingBoard.getStringState(), Board.Direction.INITIAL, cost, calculateHueristic(startingBoard, heuristic), ++nodeID);
+                //highest
+                Node bestChoice;
+                //add currentNode to Open
+                Open.add(currentNode);
                 //While Open is not empty
                 while (!Open.isEmpty()) {
-                    if (!(Reached.size() > maxNodes)) {
-                        for (Board.Direction d : currentNode.getState().getCardinalDirections()) {
-                            //then remove last direction from direction list, add to removed list
-                            if (currentNode.getState().checkDirections(d)) {
-                                directionList.add(d);
-                            }
-                        }
+                    if (!(Closed.size() > maxNodes)) {
                         //If CurrentNode = goal
-                        if (currentNode.getState().getStringState().equals(currentNode.getState().getGoalStringState())) {
+                        if (currentNode.getCurrentState().equals() {
                             //Return CurrentNode
                             return currentNode.getState().getStringState();
                         }
                         //else
                         else {
-                            //Reached <- currentNode
-                            Reached.add(currentNode);
-                            //Open <- CurrentNode.
+
+                            //direction list
+                            ArrayList<Board.Direction> directionList = new ArrayList<>();
+                            for (Board.Direction d : currentNode.getState().getCardinalDirections()) {
+                                //then remove last direction from direction list, add to removed list
+                                if (currentNode.getState().checkDirections(d)) {
+                                    directionList.add(d);
+                                }
+                            }
                             System.out.println("Creating Children...");
                             for (Board.Direction d : directionList) {
+                                //creating a theoretical board to manipulate
                                 Board child = new Board(currentNode.getState().getTotal());
                                 child.setState(currentNode.getState().getStringState());
-                                Open.add(new Node( child.move(d), d, ++cost, currentNode.getState().getStringState(), heuristic));
+                                int childCost = cost;
+                                Open.add(new Node( child.move(d), d, ++childCost, currentNode.getState().getStringState(), heuristic));
                             }
                             //Remove CurrentNode from Open to closed
                             //System.out.println(Open.get(0).toString()); //SHOULD BE STARTING NODE AT FIRST/PARENT NODE
+                            //Closed <- currentNode
+                            Reached.add(currentNode);
                             Open.remove(currentNode);
+
                             System.out.println("Evaluating Children...");
                             ArrayList<Node> OpenCopy = new ArrayList<>(Open);
-                            //System.out.println(OpenCopy);
                             //For each in Open
                             for (Node n : OpenCopy) {
                                 //If child is in closed
-                                //Calculate f(n) = g(n) +h(n)
-                                int f = n.getPathCost() + n.getHeuristicCost();
                                 //System.out.println(n.getState().getStringState() + " " + f + " " + n.getCost() + " " + n.getHeuristic());
                                 //If highest is empty
                                 if (!Objects.nonNull(bestChoice)) {
-                                    //Then If CurrentNode.f(n) < child.f(n)
+                                    //Then If CurrentNode.f(n) > child.f(n)
                                     //highest <- child
                                     bestChoice = new Node(n.getState().getStringState(), n.getMove(), n.getPathCost(), n.getParentState(), heuristic);
                                 } else
                                     //else if highest.f(n) > child.f(n)
-                                    if (!n.compareTo(currentNode)) {
+                                    if (n.compareTo(bestChoice) && n.compareTo(currentNode)) {
                                         //highest <- child
                                         bestChoice = new Node(n.getState().getStringState(), n.getMove(), n.getPathCost(), n.getParentState(), heuristic);
                                     }
@@ -241,10 +259,9 @@ public class AlgorithmSolver {
                             //currentNode = highest
                             currentNode = new Node(bestChoice.getState().getStringState(), bestChoice.getMove(), bestChoice.getPathCost(), bestChoice.getParentState(), heuristic);
                             //update state space
-                            currentBoard.move(currentNode.getMove());
+                            getCurrentBoard().move(currentNode.getMove());
                             //move currentNode to reached
                             Reached.add(new Node (currentNode.getState().getStringState(), currentNode.getMove(), currentNode.getPathCost(), currentNode.getParentState(), heuristic));
-                            Open.remove(currentNode);
                             //System.out.println(bestChoice.getState().getStringState());
                             //clear working data
                             OpenCopy.clear();
@@ -259,7 +276,7 @@ public class AlgorithmSolver {
                     }
                 }
                 System.out.println("Number of steps: " + Reached.size());
-                System.out.println("Current State " + currentNode.getState().printState());
+                System.out.println("Current State: " + System.lineSeparator() + currentNode.getState().printState());
                 return currentBoard.getStringState();
             } else {
                 //error
