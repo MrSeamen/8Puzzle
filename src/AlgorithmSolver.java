@@ -216,8 +216,6 @@ public class AlgorithmSolver {
                 ArrayList<Node> Reached = new ArrayList<>();
                 //CurrentNode <- problem.start
                 Node currentNode = new Node(startingBoard.getStringState(), Board.Direction.INITIAL, cost, calculateHueristic(startingBoard, heuristic), ++nodeID);
-                //highest
-                Node bestChoice;
                 //add currentNode to Open
                 Open.add(currentNode);
                 //While Open is not empty
@@ -264,7 +262,8 @@ public class AlgorithmSolver {
                             //move child to closed
                             //currentNode = highest
 
-                            //TODO: remove all states already been through
+                            //TODO: remove all states that are in a loop
+                            //TODO: remove all not used states to closed
                             Open.removeAll(Reached);
 
                             //update state space
@@ -287,10 +286,10 @@ public class AlgorithmSolver {
         }
         return null;
     }
-/*
+
     boolean checkGoal(ArrayList<Node> nodeList) {
         for (Node n : nodeList) {
-            if (n.getState().getStringState().equals(currentBoard.getGoalStringState())) {
+            if (n.getBoard().getStringState().equals(goalStringState)) {
                 return true;
             }
         }
@@ -401,7 +400,6 @@ public class AlgorithmSolver {
         }
         return getStringState();
     }
-    */
 
     // maxNodes <n>
     public void maxNodes(int n) {
