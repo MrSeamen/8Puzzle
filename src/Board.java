@@ -19,8 +19,6 @@ public class Board {
         directions.add(Direction.SOUTH);
         directions.add(Direction.EAST);
         directions.add(Direction.WEST);
-        makeGoalState(side);
-        makeGoalStringState(side);
     }
 
     public int getSide() {
@@ -31,15 +29,9 @@ public class Board {
         return boardState;
     }
 
-    public int[][] getGoalState() {
-        return goalState;
-    }
-
     public String getStringState() {
         return stringState;
     }
-
-    public String getGoalStringState() { return goalStringState; }
 
     // setState <state>
     String setState(String state) {
@@ -148,7 +140,7 @@ public class Board {
                     return stringState;
                 } else {
                     //error: invalid direction
-                    logger.log(LogClass.Methods.MOVE, "Invalid Direction: " + direction);
+                    logger.log(LogClass.Methods.MOVE, "Invalid Direction: " + direction + " at " + LogClass.Methods.MOVE);
                     //System.out.println("Could not move " + direction.toString() + ", move is not within board space.");
                     //this.printState();
                 }

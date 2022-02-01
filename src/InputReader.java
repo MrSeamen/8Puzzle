@@ -5,7 +5,7 @@ public class InputReader {
         Scanner scan = new Scanner(System.in);
         ReadFile fileReader = new ReadFile();
         Board puzzle = new Board(9);
-        AlgorithmSolver algorithmSolver = new AlgorithmSolver();
+        AlgorithmSolver algorithmSolver = new AlgorithmSolver(50, 3);
 
         System.out.println("Enter Directory and File name with file extension .txt");
         System.out.println("*Example*: C:\\Users\\userName\\textFile.txt");
@@ -48,13 +48,11 @@ public class InputReader {
             }
             else if (s.startsWith("solve A-star")) {
                 System.out.println("Using A-star search to solve...");
-                algorithmSolver.setCurrentBoard(puzzle.getStringState());
-                algorithmSolver.solveAStar(Integer.parseInt(s.substring(13)));
+                algorithmSolver.solveAStar(puzzle, Integer.parseInt(s.substring(13)));
             }
             else if (s.startsWith("solve beam")) {
                 System.out.println("Using beam search to solve...");
-                algorithmSolver.setCurrentBoard(puzzle.getStringState());
-                //algorithmSolver.solveBeam(Integer.parseInt(s.substring(11)));
+                //algorithmSolver.solveBeam(puzzle, Integer.parseInt(s.substring(11)));
             }
             else if (s.startsWith("maxNodes")) {
                 System.out.println("Setting max nodes allowed: " + s.substring(9));
