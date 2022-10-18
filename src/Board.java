@@ -7,7 +7,7 @@ public class Board {
     private final int total; //total amount of boxes
     private int[][] boardState; //state space
     private final LogClass logger = new LogClass(); //logger
-    enum Direction {NORTH, SOUTH, EAST, WEST, INITIAL, FINAL};
+    enum Direction {NORTH, SOUTH, EAST, WEST, INITIAL, FINAL, NULL};
     ArrayList<Direction> directions = new ArrayList<>();
 
     Board(int size) {
@@ -39,7 +39,7 @@ public class Board {
             //if state is not null
             if (Objects.nonNull(state)) {
                 char[] stateArray = state.toCharArray();
-                //then if state doesnt have the all the proper values for the specified puzzle size
+                //then if state doesn't have the all the proper values for the specified puzzle size
                 if (!checkSequentialInput(stateArray)) {
                     //warn user about the puzzle possibly not working properly (log warning)
                     logger.log(LogClass.Methods.SETSTATE, "Nonsequential Input");
@@ -265,7 +265,7 @@ public class Board {
                 //error
                 logger.log(LogClass.Methods.RANDOMIZESTATE, "Null Input Given");
             }
-            System.out.println("Path: " + path);
+            System.out.println("Randomized Path: " + path);
         } catch(Exception e) {
             logger.log(LogClass.Methods.RANDOMIZESTATE, "Unexpected Exception " + e + " at " + LogClass.Methods.RANDOMIZESTATE);
         }

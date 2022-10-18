@@ -1,9 +1,11 @@
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class BoardTest {
 
@@ -45,12 +47,12 @@ public class BoardTest {
         board.setState("012345678");
         int randomNum = random.nextInt(19)+1;
         System.out.println("Randomize " + randomNum);
-        //randomize board, check to make sure board isnt the same as regular
-        assertNotEquals("012345678", board.randomizeState(randomNum));
+        //randomize board, check to make sure board isn't the same as regular
+        Assert.assertNotEquals("012345678", board.randomizeState(randomNum));
     }
 
     @Test
-    public void move() {
+    public void moveTest() {
         board.setState("123405678");
         assertEquals("123450678", board.move(Board.Direction.EAST));
         board.setState("123405678");
@@ -84,16 +86,16 @@ public class BoardTest {
         }
     }
 
-    /*@Test
+    @Test
     public void solveAStarExhaustiveTestH1() {
         //Not meant to pass realistically, only to check the most complicated state the algoirthm can solve
-        for (int i = 1; i < Integer.MAX_VALUE; i++) {
+        for (int i = 1; i < 20; i++) {
             board.setState("012345678");
-            algorithmSolver.maxNodes(Integer.MAX_VALUE);
+            algorithmSolver.maxNodes(1000);
             board.randomizeState(i);
             assertEquals("012345678", algorithmSolver.solveAStar(board, 1).getCurrentState());
         }
-    }*/
+    }
 
     @Test
     public void solveAStarSimpleTestH2() {
@@ -115,30 +117,36 @@ public class BoardTest {
         }
     }
 
+    @Test
+    public void solveAStarExhaustiveTestH2() {
+        //Not meant to pass realistically, only to check the most complicated state the algoirthm can solve
+        for (int i = 1; i < 20; i++) {
+            board.setState("012345678");
+            algorithmSolver.maxNodes(1000);
+            board.randomizeState(i);
+            assertEquals("012345678", algorithmSolver.solveAStar(board, 2).getCurrentState());
+        }
+    }
+
 
     //Local Beam Search
-/*
     @Test
     public void solveBeam() {
-        board.maxNodes(200);
+        algorithmSolver.maxNodes(200);
         //set state to a simple solveable state
         board.setState("012345678");
         board.randomizeState(5);
-        board.solveBeam(4);
-        assertEquals("012345678", board.solveBeam(4));
+        assertEquals("012345678", algorithmSolver.solveBeam(board,4, 1));
         //set state to a more complex but solveable state
         board.setState("012345678");
         board.randomizeState(20);
-        board.solveBeam(4);
-        assertEquals("012345678", board.solveBeam(4));
+        assertEquals("012345678", algorithmSolver.solveBeam(board,4, 1));
         //set state to a really complex but solveable state
         board.setState("012345678");
         board.randomizeState(50);
-        assertEquals("012345678", board.solveBeam(4));
-        board.solveBeam(4);
+        assertEquals("012345678", algorithmSolver.solveBeam(board,4, 1));
         //set state to an unsolveable state
-         board.setState("123456780");
-         assertNotEquals("012345678", board.solveBeam(4));
+        board.setState("123456780");
+        assertNotEquals("012345678", algorithmSolver.solveBeam(board,4, 1));
     }
-    */
 }
