@@ -128,23 +128,37 @@ public class BoardTest {
         }
     }
 
-
     //Local Beam Search
     @Test
-    public void solveBeam() {
+    public void solveBeamSimple() {
         algorithmSolver.maxNodes(200);
         //set state to a simple solveable state
         board.setState("012345678");
         board.randomizeState(5);
         assertEquals("012345678", algorithmSolver.solveBeam(board,4, 1));
+    }
+
+    @Test
+    public void solveBeamComplex() {
+        algorithmSolver.maxNodes(200);
         //set state to a more complex but solveable state
         board.setState("012345678");
         board.randomizeState(20);
         assertEquals("012345678", algorithmSolver.solveBeam(board,4, 1));
+    }
+
+    @Test
+    public void solveBeamReallyComplex() {
+        algorithmSolver.maxNodes(200);
         //set state to a really complex but solveable state
         board.setState("012345678");
         board.randomizeState(50);
         assertEquals("012345678", algorithmSolver.solveBeam(board,4, 1));
+    }
+
+    @Test
+    public void solveBeamUnsolvable() {
+        algorithmSolver.maxNodes(200);
         //set state to an unsolveable state
         board.setState("123456780");
         assertNotEquals("012345678", algorithmSolver.solveBeam(board,4, 1));
